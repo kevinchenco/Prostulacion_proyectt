@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sismic Events</title>
+  <style>
+    /* Estilos CSS aquí */
+  </style>
+</head>
+<body>
+  <h1>Sismic Events</h1>
+  
+  <h2>Lista de Features Sismológicos</h2>
+  <ul id="features-list"></ul>
+
+  <h2>Crear Comentario</h2>
+  <form id="comment-form">
+    <label for="feature-id">ID del Feature:</label>
+    <input type="number" id="feature-id" required>
+    <label for="comment-body">Comentario:</label>
+    <textarea id="comment-body" required></textarea>
+    <button type="submit">Enviar Comentario</button>
+  </form>
+
+  <script>
+    // JavaScript aquí
+    document.addEventListener('DOMContentLoaded', () => {
+      // Función para obtener y mostrar la lista de features
+      const fetchFeatures = async () => {
+        const response = await fetch('http://localhost:3000/api/features');
+        const data = await response.json();
+        const featuresList = document.getElementById('features-list');
+
+        // Limpiar lista antes de agregar nuevos elementos
+        featuresList.innerHTML = '';
+
+        data.data.forEach(feature => {
+          const li = document.createElement('li');
+          li.textContent = `${feature.attributes.title} - Magnitud: ${feature.attributes.magnitude}`;
+          featuresList.appendChild(li);
+        });
+      };
+
+      // Función para enviar comentario
+      const submitComment = async (event) => {
+        event.preventDefault();
+
+        const featureId = document.getElementById('feature-id').value;
+        const commentBody = document.getElementById('comment-body').value;
+
+        const response = await fetch('http://localhost:3000/api/features/comments', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            feature_id: parseInt(featureId),
+            body: commentBody
+          })
+        });
+
+        if (response.ok) {
+          alert('Comentario creado exitosamente');
+          document.getElementById('comment-form').reset();
+        } else {
+          alert('Error al crear comentario');
+        }
+      };
+
+      // Escuchar el envío del formulario de comentario
+      document.getElementById('comment-form').addEventListener('submit', submitComment);
+
+      // Obtener y mostrar la lista de features al cargar la página
+      fetchFeatures();
+    });
+  </script>
+</body>
+</html>
